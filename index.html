@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>یادداشت‌های من 📝</title>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Vazirmatn', sans-serif;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --danger: #ef4444;
+        }
+
+        body {
+            background: var(--bg);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: var(--text);
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .search-box input {
+            flex: 1;
+            min-width: 200px;
+            padding: 15px 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .search-box input:focus {
+            border-color: var(--primary);
+        }
+
+        .btn {
+            padding: 15px 25px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+
+        .notes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .note-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+        }
+
+        .note-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .note-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 10px;
+        }
+
+        .note-content {
+            color: var(--text-light);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 15px;
+            max-height: 100px;
+            overflow: hidden;
+        }
+
+        .note-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .tag {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .tag-work { background: #dbeafe; color: #1d4ed8; }
+        .tag-personal { background: #fce7f3; color: #be185d; }
+        .tag-ideas { background: #dcfce7; color: #15803d; }
+        .tag-urgent { background: #fee2e2; color: #dc2626; }
+        .tag-default { background: #f1f5f9; color: #475569; }
+
+        .note-date {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            margin-bottom: 10px;
+        }
+
+        .note-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn-edit, .btn-delete {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+
+        .btn-edit {
+            background: #f1f5f9;
+            color: var(--text);
+        }
+
+        .btn-edit:hover {
+            background: #e2e8f0;
+        }
+
+        .btn-delete {
+            background: #fee2e2;
+            color: var(--danger);
+        }
+
+        .btn-delete:hover {
+            background: #fecaca;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            width: 100%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal h2 {
+            margin-bottom: 20px;
+            color: var(--text);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            border-color: var(--primary);
+        }
+
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+        }
+
+        .btn-cancel {
+            background: #f1f5f9;
+            color: var(--text);
+        }
+
+        .btn-cancel:hover {
+            background: #e2e8f0;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-light);
+        }
+
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .stat-label {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .note-card {
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @media (max-width: 600px) {
+            .search-box {
+                flex-direction: column;
+            }
+            
+            .search-box input {
+                min-width: 100%;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+            
+            .notes-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📝 یادداشت‌های من</h1>
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-number" id="totalNotes">0</div>
+                    <div class="stat-label">کل یادداشت‌ها</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="searchResults">0</div>
+                    <div class="stat-label">نتایج جستجو</div>
+                </div>
+            </div>
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="🔍 جستجو در یادداشت‌ها...">
+                <button class="btn btn-primary" onclick="openModal()">+ یادداشت جدید</button>
+            </div>
+        </header>
+
+        <div class="notes-grid" id="notesGrid"></div>
+
+        <div class="empty-state" id="emptyState" style="display: none;">
+            <h3>هنوز یادداشتی نداری!</h3>
+            <p>اولین یادداشتت رو بساز</p>
+        </div>
+    </div>
+
+    <!-- Modal for Add/Edit -->
+    <div class="modal" id="noteModal">
+        <div class="modal-content">
+            <h2 id="modalTitle">یادداشت جدید</h2>
+            <form id="noteForm">
+                <input type="hidden" id="noteId">
+                <div class="form-group">
+                    <label>عنوان</label>
+                    <input type="text" id="noteTitle" required placeholder="عنوان یادداشت...">
+                </div>
+                <div class="form-group">
+                    <label>متن یادداشت</label>
+                    <textarea id="noteContent" required placeholder="متن یادداشت رو بنویس..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>برچسب</label>
+                    <select id="noteTag">
+                        <option value="default">بدون برچسب</option>
+                        <option value="work">کاری 💼</option>
+                        <option value="personal">شخصی 👤</option>
+                        <option value="ideas">ایده 💡</option>
+                        <option value="urgent">فوری 🔴</option>
+                    </select>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-cancel" onclick="closeModal()">لغو</button>
+                    <button type="submit" class="btn btn-primary">ذخیره</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Load notes from localStorage
+        let notes = JSON.parse(localStorage.getItem('miraNotes')) || [];
+
+        // Save to localStorage
+        function saveNotes() {
+            localStorage.setItem('miraNotes', JSON.stringify(notes));
+            renderNotes();
+        }
+
+        // Render notes
+        function renderNotes(searchTerm = '') {
+            const grid = document.getElementById('notesGrid');
+            const emptyState = document.getElementById('emptyState');
+            const totalNotes = document.getElementById('totalNotes');
+            const searchResults = document.getElementById('searchResults');
+
+            let filteredNotes = notes;
+
+            if (searchTerm) {
+                const term = searchTerm.toLowerCase();
+                filteredNotes = notes.filter(note => 
+                    note.title.toLowerCase().includes(term) || 
+                    note.content.toLowerCase().includes(term) ||
+                    note.tag.toLowerCase().includes(term)
+                );
+            }
+
+            totalNotes.textContent = notes.length;
+            searchResults.textContent = filteredNotes.length;
+
+            if (notes.length === 0) {
+                grid.innerHTML = '';
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            emptyState.style.display = 'none';
+
+            grid.innerHTML = filteredNotes.map(note => `
+                <div class="note-card">
+                    <div class="note-title">${escapeHtml(note.title)}</div>
+                    <div class="note-content">${escapeHtml(note.content)}</div>
+                    <div class="note-tags">
+                        <span class="tag tag-${note.tag}">${getTagLabel(note.tag)}</span>
+                    </div>
+                    <div class="note-date">${note.date}</div>
+                    <div class="note-actions">
+                        <button class="btn-edit" onclick="editNote(${note.id})">✏️ ویرایش</button>
+                        <button class="btn-delete" onclick="deleteNote(${note.id})">🗑️ حذف</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Escape HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Get tag label
+        function getTagLabel(tag) {
+            const labels = {
+                'work': 'کاری 💼',
+                'personal': 'شخصی 👤',
+                'ideas': 'ایده 💡',
+                'urgent': 'فوری 🔴',
+                'default': 'بدون برچسب'
+            };
+            return labels[tag] || 'بدون برچسب';
+        }
+
+        // Open modal
+        function openModal(noteId = null) {
+            const modal = document.getElementById('noteModal');
+            const form = document.getElementById('noteForm');
+            const title = document.getElementById('modalTitle');
+
+            if (noteId) {
+                const note = notes.find(n => n.id === noteId);
+                if (note) {
+                    title.textContent = 'ویرایش یادداشت';
+                    document.getElementById('noteId').value = note.id;
+                    document.getElementById('noteTitle').value = note.title;
+                    document.getElementById('noteContent').value = note.content;
+                    document.getElementById('noteTag').value = note.tag;
+                }
+            } else {
+                title.textContent = 'یادداشت جدید';
+                form.reset();
+                document.getElementById('noteId').value = '';
+            }
+
+            modal.classList.add('active');
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('noteModal').classList.remove('active');
+        }
+
+        // Save note
+        document.getElementById('noteForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const id = document.getElementById('noteId').value;
+            const title = document.getElementById('noteTitle').value;
+            const content = document.getElementById('noteContent').value;
+            const tag = document.getElementById('noteTag').value;
+            const date = new Date().toLocaleDateString('fa-IR');
+
+            if (id) {
+                // Edit
+                const index = notes.findIndex(n => n.id === parseInt(id));
+                if (index !== -1) {
+                    notes[index] = { ...notes[index], title, content, tag, date };
+                }
+            } else {
+                // Add
+                const newNote = {
+                    id: Date.now(),
+                    title,
+                    content,
+                    tag,
+                    date
+                };
+                notes.unshift(newNote);
+            }
+
+            saveNotes();
+            closeModal();
+        });
+
+        // Edit note
+        function editNote(id) {
+            openModal(id);
+        }
+
+        // Delete note
+        function deleteNote(id) {
+            if (confirm('میخوای این یادداشت رو حذف کنی؟ 🗑️')) {
+                notes = notes.filter(n => n.id !== id);
+                saveNotes();
+            }
+        }
+
+        // Search
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            renderNotes(e.target.value);
+        });
+
+        // Close modal on outside click
+        document.getElementById('noteModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        // Initial render
+        renderNotes();
+    </script>
+</body>
+</html>
